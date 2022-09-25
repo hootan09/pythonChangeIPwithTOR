@@ -1,87 +1,143 @@
-[عوض کردنIP در پایتون - کیبوردی برای آزادی](https://igmag.ir/%D8%A7%D8%B1%D8%B3%D8%A7%D9%84-http-%D8%B1%DB%8C%DA%A9%D9%88%D8%A6%D8%B3%D8%AA-%D8%A8%D8%A7-ip-%D9%87%D8%A7%DB%8C-%D9%85%D8%AE%D8%AA%D9%84%D9%81-%D8%AF%D8%B1-%D9%BE%D8%A7%DB%8C%D8%AA%D9%88%D9%86-j16ype0drq5b)
+[Configuring TOR with Python. Mask Your IP Address using a Python… | by Mayank Pandey | Aug, 2022 | InfoSec Write-ups](https://infosecwriteups.com/configuring-tor-with-python-1a90fc1c246f)
 
-# عوض کردنIP در پایتون
- 
-تصور کنید یک **Web Scrapper** ساختید که قراره به یک وبسایت در خواست های خیلی زیاد HTTP بزنه و داده هاشو استخراج کنه. در این طور مواقع وبسایت ممکنه IP شما رو بلاک کنه در این آموزش قراره به شما یاد بدم چطور وبسایت های که **IP Based Restrictions** دارن رو دور بزنید.
- 
-در این آموزش من از سیستم عامل **Ubuntu 20.04.4** و پایتون ورژن **3.8.10** استفاده میکنم اگه شما هم لینوکس دارید به راحتی میتونید دستورات زیر را وارد کنید اما اگر از ویندوز استفاده میکنید خودتون باید سرچ کنید و نحوه نصب و پیکربندی برنامه ها را پیدا کنید.
- 
-در اینجا قرار من با استفاده از **Tor** و پایتون IP خودم را پنهان و برای ارسال درخواست از IP های مختلف استفاده کنم. ابتدا بریم سراغ نصب و پیکربندی Tor در لینوکس که ابزار اصلی ما برای پنهان کردن IP میباشد.
- 
-#### نصب Tor
+# Configuring TOR with Python
 
-برای نصب Tor میتونید بسته به سیستم عامل برنامه مورد نظر را از سایت دانلود و نصب کنید. البته آدرس سایت رو من اینجا نذاشتم اما به راحتی میتونید در اینترنت پیدا کنید. اما اگه از لینوکس های دبیان بیس استفاده میکنید به راحتی میتونید با دستورات زیر نصب کنید.
+## Mask Your IP Address using a Python Script
+
+If you ever built a web scrapper then you must have faced the issue of being blocked by web servers for generating too many requests, or you Just wanted to hide your Real IP Address and automate your scripts.
+
+In this article, I will explain how to configure TOR on your Linux System and How to implement TOR in a Python script to Mask your Real IP and Bypass IP Based Restrictions.
+
+![](./gIwzFlBnywbQyQ8-ioWH7A.jpeg)
+
+
+# What is TOR?
+
+For Those who are new to Hacking and Programming _“Tor, short for The Onion Router, is free and open-source software for enabling anonymous communication”._ **_Tor network is a secure, encrypted protocol that can ensure privacy for data and communications on the web_**_._
+
+The Tor service/browser works **by using a technology known as onion routing**. The onion router is a peer-to-peer (P2P) overlay network that enables users to browse the internet anonymously. Onion routing uses multiple layers of encryption to conceal both the source and destination of information sent over the network.
+
+The TOR Network is usually accessed using the TOR Browser, but what if you wanted to use it in your Python Scripts and run Automation scripts over the TOR Network? **That's exactly what we are going to do today!!**
+
+# Tor installation
+
+The installation of Tor depends on your system and is detailed on the official [website](https://www.torproject.org/download/). For Most Debian Based systems this will work.
 ```sh
 sudo apt-get install tor
-``` 
-حالا برای اجرای برنامه دستور زیر را وارد کنید.
-```sh 
+```
+To launch Tor, run:
+```sh
 sudo service tor start
-``` 
-برای اینکه بفهمید برنامه به درستی نصب و اجرا شده دستور زیر را ترمینال خودتون وارد کنید.
-```sh 
+```
+To check if it works, simply run the following command from a terminal:
+```sh
 curl --socks5 localhost:9050 --socks5-hostname localhost:9050 -s https://check.torproject.org/ | cat | grep -m 1 Congratulations | xargs
-``` 
-اگر برنامه به درستی اجرا شده باشد باید پیغام زیر را به شما نمایش بده.
-```sh 
+```
+If everything works fine You will get this output.
+```txt
 Congratulations. This browser is configured to use Tor.
-``` 
-#### نصب پکیج های مورد نیاز پایتون
-```sh 
-sudo pip3 install requests 
-sudo pip3 install 'requests\[socks\]'
-sudo pip3 install 'requests\[security\]'
+```
+# Configuring with Python
+
+Python Requests Module will be used to send Requests over TOR Network.
+```sh
+sudo pip3 install requests  
+sudo pip3 install requests[socks]  
+sudo pip3 install requests[security]  
 sudo pip3 install cryptography
-``` 
-خب حالا کد ایتور خودتون رو باز کنید و کد زیر رو وارد کنید تا IP واقعی خودتون رو بینید.
-```py 
+```
+We can now use to requests module.
+```py
 import requests
- 
-res = requests.get('https://ident.me').text
-print(f"My IP Address is: {res}")
-``` 
-اینجا ما از سرویس **[ident.me](https://ident.me/)** استفاده میکنیم تا IP خودمون رو بدست بیاریم اگه الان وارد سایت بشید میتونید IP خودتون رو ببینید.
- 
-#### ساخت هویت جدید
- 
-وقتشه دیگه همه چیز رو کنار هم بذاریم و با هویت جدیدمون در اینترنت دیده بشیم اما قبل از اون هنوز به نصب چند تا پکیج و یکم پیکربندی نیاز داریم. برای اینکه بتونیم هر بار که با پایتون درخواست میدیم از IP جدیدی استفاده کنیم باید از **“Stem”** که controller پایتون برای Tor هستش را ابتدا نصب کنیم.
- 
-#### محکم کاری بیشتر
+```
+You can check your IP address without Tor with the command:
+```py
+requests.get('https://ident.me').text
+```
+The Output will be your Original IP Address.
 
-برای اینکه هویت خودمون رو یکم بیشتر مخفی کنیم از کتابخونه **“Fake UserAgent”** استفاده میکنم که به ما این امکان رو میده هر بار با **User Agent** های مختلف درخواست خودمون رو ارسال کنیم و در مجموع اون سروری که قراره ما بهش درخواست بفرستیم فکر میکنه هر بار یک IP و مرورگر های مخلتف داره بهش درخواست رو میفرسته :)))) زیبا نیست, خب بریم سراغ نصب پکیج ها
-```sh 
-sudo pip3 install stem
-sudo pip3 install fake\_useragent
-``` 
-حالا باید کنترل کننده Tor را برای درخواست تجدید هویت پیکربندی کنیم. برای این کار به فایل زیر برید.
-```sh 
+To Use the TOR network inside Python Scripts we first need to tell python to use a Proxy.
+```py
+proxies = {  
+    'http': 'socks5://127.0.0.1:9050',  
+    'https': 'socks5://127.0.0.1:9050'  
+}
+```
+Now, you should have a new IP address with:
+```py
+requests.get('https://ident.me', proxies=proxies).text
+```
+# Getting New Identity
+
+We need to get New IP address every time we make a new request or at fixed time intervals, For this, we need a Python Module called **“Stem”.**
+
+The stem is a Python controller library for [**Tor**](https://www.torproject.org/). With it, you can use Tor’s [**control protocol**](https://gitweb.torproject.org/torspec.git/tree/control-spec.txt) to script against the Tor process.
+
+For more anonymity, we can generate a new User Agent for Every request using the **“Fake UserAgent”** Module. Both of these modules Can be Installed using pip.
+```sh
+sudo pip3 install stem  
+sudo pip3 install fake_useragent
+```
+The Tor controller must also be configured to request identity renewal.
+```sh
 sudo nano /etc/tor/torrc
-``` 
-حالا دستورات زیر را در انتهای فایل وارد و سیو کنید.
-```sh 
-ControlPort 9051 
+```
+Save the following lines in the `/etc/tor/torrc` file.
+```sh
+ControlPort 9051  
 CookieAuthentication 1
-``` 
-و در نهایت Tor را ری استارت کنید تا پیکربندی های جدید اعمال شود.
-```sh 
+```
+Then we restart Tor to take into account these modifications:
+```sh
 sudo service tor restart
-``` 
+```
+# Packing it all in a Script
+
+We now have everything ready all we need to do is to pack these things in a Script.
+
+First of all, we need to import the needed modules.
+
+![](./E1HVzcbA623Pk3XmE3VOBg.png)
+
+After importing the modules we define our proxy.
+
+![](./qZwxCZ_sWdGBNbpKzUTsVQ.png)
+
+Now we will define a Handler for our Stem Controller. Using this handler we will Authenticate our Requests and Generate Signals to get a New IP address.
+
+![](./e888rUNLEcASBozE2Ozp0g.png)
+
+_Here is the Full Code_
+
+```py
+import time
+import requests
+from fake_useragent import UserAgent
+from stem import Signal
+from stem.control import Controller
+proxies = {
+    'http': 'socks5://127.0.0.1:9050',
+    'https': 'socks5://127.0.0.1:9050'
+}
+print("Changing IP Address in every 10 seconds....\n\n")
+while True:
+    headers = { 'User-Agent': UserAgent().random }
+    time.sleep(10)
+    with Controller.from_port(port = 9051) as c:
+        c.authenticate()
+        c.signal(Signal.NEWNYM)
+        print(f"Your IP is : {requests.get('https://ident.me', proxies=proxies, headers=headers).text}  ||  User Agent is : {headers['User-Agent']}")
+```
+
+This code will generate a New IP Address every 10 seconds with a fresh User Agent in every Request.
+
+![](./CW_xoPSyghMkBWRnojapuA.png)
+
+## Use Cases for this Tool
  
+There are many Scenarios in which this can be used, it can be used as a base to create many amazing tools to solve problems like
 
-![](./zlrwhf9lndal.png)
-
-مهمترین قسمت های این کد این دو قسمت هستند.
- 
-![](./muab6ytbuztn.png)
-
-در اینجا ما به کتابخونه requests میگیم که تمام درخواست ها رو ازین مسیر رد کنه, یعنی چی؟ به این کار میگن پروکسی کردن با این کار ما ابتدا درخواست رو به برنامه Tor میدیم که در مسیر 127.0.0.1 و پورت 9050 درحال شنود است. و برنامه Tor درخواست رو میگیره و هر بار با IP های مختلف اون رو ارسال میکنه.
- 
-![](./pubirraw6zqf.png)
-
-و در اینجاست که هر بار IP جدیدی برای ما ساخته میشه.
- 
-![](./loxb70vfmr4z.png)
-
-اگه برنامه رو اجرا کنید میتونید IP هایی که درخواست شما باهاش فرستاده میشه رو ببینید.
-
-امیدوارم که این آموزش به کارتون بیاد برای خودتون که خیلی مفید بود چون تونستم اطلاعات کلی سایت رو جارو کنم :)))
+-   Scraping Normal Web Without Getting Blocked
+-   Making a Dark Web Scraper
+-   Tool to Mask IP Address
+-   And Many More…..
